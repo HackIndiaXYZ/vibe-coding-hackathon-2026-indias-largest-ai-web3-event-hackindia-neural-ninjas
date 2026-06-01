@@ -23,14 +23,6 @@ export function CtaSection() {
                 Start Free Scan
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="gap-2 rounded-lg font-semibold"
-              >
-                <Calendar className="h-4 w-4" />
-                Book Demo
-              </Button>
             </div>
 
             <p className="text-xs text-muted-foreground">
