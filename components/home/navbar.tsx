@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Shield, Menu, X } from "lucide-react";
+import Link from "next/link";
 
 const navItems = [
   { label: "Features", href: "#features" },
@@ -42,11 +43,11 @@ export function Navbar() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="text-sm font-medium">
-              Sign In
+            <Button asChild variant="ghost" size="sm" className="text-sm font-medium">
+              <Link href="/sign-in">Sign In</Link>
             </Button>
-            <Button size="sm" className="rounded-lg text-sm font-semibold">
-              Start Free Scan
+            <Button asChild size="sm" className="rounded-lg text-sm font-semibold">
+              <Link href="/sign-up">Start Free Scan</Link>
             </Button>
           </div>
 

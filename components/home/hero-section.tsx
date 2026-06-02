@@ -11,6 +11,7 @@ import {
   Zap,
   TrendingUp,
 } from "lucide-react";
+import Link from "next/link";
 
 export function HeroSection() {
   return (
@@ -52,8 +53,8 @@ export function HeroSection() {
             </p>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Button size="lg" className="group gap-2 rounded-lg font-semibold">
-                Start Free Scan
+              <Button asChild size="lg" className="group gap-2 rounded-lg font-semibold">
+                <Link href="/sign-up">Start Free Scan</Link>
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
               <Button
