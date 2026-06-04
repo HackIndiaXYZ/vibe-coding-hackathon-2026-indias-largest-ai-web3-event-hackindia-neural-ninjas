@@ -5,14 +5,17 @@
  *
  * Client-side UI for the Deepfake Voice Checker.
  * Calls POST /api/analyze/voice and renders ResultCard.
- * No business logic here — all AI work is server-side.
+ * Handles credit pre-check (402), shows InsufficientCreditsBanner,
+ * and displays remaining credits after a successful scan.
  */
 
 import { useState, useCallback } from "react";
-import { Mic, Loader2, Shield } from "lucide-react";
+import { Mic, Loader2, Shield, Zap } from "lucide-react";
 import { FileUploadZone } from "@/components/features/shared/file-upload-zone";
 import { ResultCard, ResultCardSkeleton } from "@/components/features/shared/result-card";
+import { InsufficientCreditsBanner } from "@/components/dashboard/insufficient-credits-banner";
 import type { VoiceDetectionResult } from "@/lib/features/voice-detection/voice-detection.types";
+import { SCAN_CREDITS } from "@/lib/db/types";
 
 const V = {
   primary:  "var(--primary)",
@@ -22,7 +25,10 @@ const V = {
   muted:    "var(--muted)",
   mutedFg:  "var(--muted-foreground)",
   cardFg:   "var(--card-foreground)",
+  chart1:   "var(--chart-1)",
 };
+
+const COST = SCAN_CREDITS.voice; // 5
 
 export function VoiceCheckerPanel() {
   const [file, setFile] = useState<File | null>(null);
@@ -30,11 +36,17 @@ export function VoiceCheckerPanel() {
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<VoiceDetectionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [creditsRemaining, setCreditsRemaining] = useState<number | null>(null);
+  const [insufficientCredits, setInsufficientCredits] = useState<{
+    required: number;
+    available: number;
+  } | null>(null);
 
   const handleFileSelected = useCallback((f: File) => {
     setFile(f);
     setResult(null);
     setError(null);
+    setInsufficientCredits(null);
   }, []);
 
   const handleScan = async () => {
@@ -42,9 +54,9 @@ export function VoiceCheckerPanel() {
     setLoading(true);
     setError(null);
     setResult(null);
-
-    // Simulate upload progress
+    setInsufficientCredits(null);
     setProgress(0);
+
     const progInterval = setInterval(() => {
       setProgress((p) => (p < 85 ? p + 5 : p));
     }, 400);
@@ -61,11 +73,19 @@ export function VoiceCheckerPanel() {
       const json = await res.json();
       setProgress(100);
 
+      if (res.status === 402 && json.insufficientCredits) {
+        setInsufficientCredits({ required: json.required, available: json.available });
+        return;
+      }
+
       if (!res.ok || !json.success) {
         throw new Error(json.error ?? "Analysis failed. Please try again.");
       }
 
       setResult(json.data as VoiceDetectionResult);
+      if (typeof json.creditsRemaining === "number") {
+        setCreditsRemaining(json.creditsRemaining);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unexpected error");
     } finally {
@@ -89,6 +109,16 @@ export function VoiceCheckerPanel() {
           <div>
             <p className="text-sm font-bold" style={{ color: V.cardFg }}>Upload Audio File</p>
             <p className="text-xs" style={{ color: V.mutedFg }}>Drag and drop or click to browse</p>
+          </div>
+          <div className="ml-auto flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
+            style={{
+              background: `color-mix(in oklch, ${V.primary} 10%, transparent)`,
+              color: V.mutedFg,
+              border: `1px solid ${V.border}`,
+            }}
+          >
+            <Zap className="h-3 w-3" style={{ color: V.primary }} />
+            {COST} credits
           </div>
         </div>
 
@@ -132,11 +162,21 @@ export function VoiceCheckerPanel() {
           ) : (
             <>
               <Shield className="h-4 w-4" />
-              Scan for Deepfake
+              Scan for Deepfake · {COST} Credits
             </>
           )}
         </button>
       </div>
+
+      {/* Insufficient credits */}
+      {insufficientCredits && (
+        <InsufficientCreditsBanner
+          required={insufficientCredits.required}
+          available={insufficientCredits.available}
+          currentPlan="free"
+          currentCredits={insufficientCredits.available}
+        />
+      )}
 
       {/* Error */}
       {error && (
@@ -145,6 +185,21 @@ export function VoiceCheckerPanel() {
           style={{ background: "color-mix(in oklch, var(--destructive) 10%, var(--card))", border: "1px solid color-mix(in oklch, var(--destructive) 30%, var(--border))", color: "var(--destructive)" }}
         >
           ⚠ {error}
+        </div>
+      )}
+
+      {/* Credits deducted toast */}
+      {creditsRemaining !== null && result && (
+        <div
+          className="flex items-center gap-2.5 rounded-xl px-4 py-3 text-xs font-semibold"
+          style={{
+            background: `color-mix(in oklch, ${V.chart1} 10%, ${V.card})`,
+            border: `1px solid color-mix(in oklch, ${V.chart1} 25%, ${V.border})`,
+            color: V.chart1,
+          }}
+        >
+          <Zap className="h-3.5 w-3.5 shrink-0" />
+          {COST} credits used · {creditsRemaining} credits remaining
         </div>
       )}
 

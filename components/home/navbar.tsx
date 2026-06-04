@@ -75,11 +75,11 @@ export function Navbar() {
               </a>
             ))}
             <div className="flex flex-col gap-2 pt-2 border-t border-border">
-              <Button variant="outline" size="sm" className="w-full rounded-lg">
-                Sign In
+              <Button asChild variant="outline" size="sm" className="w-full rounded-lg">
+                <Link href="/sign-in">Sign In</Link>
               </Button>
-              <Button size="sm" className="w-full rounded-lg font-semibold">
-                Start Free Scan
+              <Button asChild size="sm" className="w-full rounded-lg font-semibold">
+                <Link href="/sign-up">Start Free Scan</Link>
               </Button>
             </div>
           </div>

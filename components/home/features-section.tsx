@@ -1,14 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Mic,
   Phone,
   MessageSquare,
-  Globe,
   Video,
-  Newspaper,
-  Database,
-  Bell,
+  ShieldAlert,
+  Lightbulb,
 } from "lucide-react";
 
 const features = [
@@ -29,14 +26,6 @@ const features = [
     span: "",
   },
   {
-    icon: Globe,
-    title: "Website Scanner",
-    description:
-      "Detect fake websites, typosquatted domains, and malicious URLs in seconds.",
-    primary: false,
-    span: "",
-  },
-  {
     icon: Video,
     title: "Deepfake Detection",
     description:
@@ -45,26 +34,18 @@ const features = [
     span: "",
   },
   {
-    icon: Newspaper,
-    title: "Fake News Verification",
+    icon: ShieldAlert,
+    title: "Risk Scoring System",
     description:
-      "Cross-reference claims against verified sources to surface misinformation.",
+      "AI-powered composite risk scores that quantify threat severity across calls, messages, and media — so you always know how dangerous a situation is.",
     primary: false,
     span: "",
   },
   {
-    icon: Database,
-    title: "Threat Intelligence",
+    icon: Lightbulb,
+    title: "Recommendation",
     description:
-      "Access continuously updated databases of known fraud patterns and threat actors.",
-    primary: false,
-    span: "",
-  },
-  {
-    icon: Bell,
-    title: "Real-Time Alerts",
-    description:
-      "Instant notifications for emerging threats, so you are always one step ahead.",
+      "Personalised, actionable next steps surfaced after every scan — block, report, or safely ignore with confidence backed by AI reasoning.",
     primary: false,
     span: "",
   },

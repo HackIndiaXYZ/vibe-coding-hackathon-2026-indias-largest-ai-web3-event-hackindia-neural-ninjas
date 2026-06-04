@@ -35,15 +35,15 @@ export function HeroSection() {
                 className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium border-primary/30 text-primary bg-primary/5"
               >
                 <Zap className="h-3 w-3" />
-                AI-Powered Trust Detection
+                AI-Powered Detection
               </Badge>
             </div>
 
-            <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl leading-[1.1]">
-              Detect Scam Calls,{" "}
-              <span className="text-primary">Fake SMS</span> &{" "}
+            <h1 className="text-4xl font-bold font-[inter] tracking-tight text-foreground sm:text-5xl lg:text-6xl leading-[1.1]">
+              Detect {" "}
+              <span className="text-primary">Deepfake Calls & SMS Scams</span>
               <br className="hidden sm:block" />
-              Deepfakes Instantly
+              Instantly with AI
             </h1>
 
             <p className="text-base text-muted-foreground sm:text-lg leading-relaxed max-w-lg">
@@ -54,15 +54,18 @@ export function HeroSection() {
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <Button asChild size="lg" className="group gap-2 rounded-lg font-semibold">
-                <Link href="/sign-up">Start Free Scan</Link>
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <Link href="/sign-up" className="flex items-center gap-2">
+                  Start Free Scan
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
               </Button>
               <Button
+                asChild
                 variant="outline"
                 size="lg"
                 className="rounded-lg font-semibold"
               >
-                Learn More
+                <a href="#features">Learn More</a>
               </Button>
             </div>
 
