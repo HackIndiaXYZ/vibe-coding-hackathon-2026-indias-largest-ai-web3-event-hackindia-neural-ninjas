@@ -21,6 +21,11 @@ export function GoogleSignInButton({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            // Always show the Google account chooser so users can sign in
+            // with a different or new Gmail account
+            prompt: "select_account",
+          },
         },
       });
     } catch {

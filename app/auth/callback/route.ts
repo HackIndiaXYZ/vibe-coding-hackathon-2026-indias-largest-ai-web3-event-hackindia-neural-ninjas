@@ -11,7 +11,18 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      // In production (Vercel / reverse proxy), use the forwarded host so the
+      // redirect URL resolves to the correct public domain instead of the internal host.
+      const forwardedHost = request.headers.get("x-forwarded-host");
+      const isLocalEnv = process.env.NODE_ENV === "development";
+
+      if (isLocalEnv || !forwardedHost) {
+        return NextResponse.redirect(`${origin}${next}`);
+      }
+
+      // Infer protocol from forwarded-proto header (defaults to https)
+      const proto = request.headers.get("x-forwarded-proto") ?? "https";
+      return NextResponse.redirect(`${proto}://${forwardedHost}${next}`);
     }
   }
 

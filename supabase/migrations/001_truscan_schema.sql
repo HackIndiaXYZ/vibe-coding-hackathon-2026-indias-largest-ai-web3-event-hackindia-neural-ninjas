@@ -4,14 +4,10 @@
 -- https://supabase.com/dashboard/project/hzbxhipccoidgebvhczx/sql/new
 -- ============================================================
 
--- Drop existing tables if they exist (for clean re-run)
-DROP TABLE IF EXISTS public.scans CASCADE;
-DROP TABLE IF EXISTS public.profiles CASCADE;
-
 -- ============================================================
 -- Table: profiles
 -- ============================================================
-CREATE TABLE public.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
   id           uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email        text,
   full_name    text,
@@ -31,6 +27,7 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON public.profiles;
 CREATE TRIGGER update_profiles_updated_at
   BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
@@ -38,7 +35,7 @@ CREATE TRIGGER update_profiles_updated_at
 -- ============================================================
 -- Table: scans
 -- ============================================================
-CREATE TABLE public.scans (
+CREATE TABLE IF NOT EXISTS public.scans (
   id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id          uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   scan_type        text NOT NULL CHECK (scan_type IN ('voice', 'message', 'call')),
@@ -52,10 +49,10 @@ CREATE TABLE public.scans (
 );
 
 -- Indexes for fast queries
-CREATE INDEX idx_scans_user_id ON public.scans(user_id);
-CREATE INDEX idx_scans_created_at ON public.scans(created_at DESC);
-CREATE INDEX idx_scans_scan_type ON public.scans(scan_type);
-CREATE INDEX idx_scans_user_created ON public.scans(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_scans_user_id ON public.scans(user_id);
+CREATE INDEX IF NOT EXISTS idx_scans_created_at ON public.scans(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_scans_scan_type ON public.scans(scan_type);
+CREATE INDEX IF NOT EXISTS idx_scans_user_created ON public.scans(user_id, created_at DESC);
 
 -- ============================================================
 -- Enable Row Level Security
@@ -66,6 +63,10 @@ ALTER TABLE public.scans ENABLE ROW LEVEL SECURITY;
 -- ============================================================
 -- RLS Policies: profiles
 -- ============================================================
+DROP POLICY IF EXISTS "profiles_select_own" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_insert_own" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
+
 CREATE POLICY "profiles_select_own"
   ON public.profiles FOR SELECT
   TO authenticated
@@ -85,6 +86,9 @@ CREATE POLICY "profiles_update_own"
 -- ============================================================
 -- RLS Policies: scans
 -- ============================================================
+DROP POLICY IF EXISTS "scans_select_own" ON public.scans;
+DROP POLICY IF EXISTS "scans_insert_own" ON public.scans;
+
 CREATE POLICY "scans_select_own"
   ON public.scans FOR SELECT
   TO authenticated
@@ -103,6 +107,11 @@ GRANT SELECT, INSERT ON public.scans TO authenticated;
 
 -- ============================================================
 -- Auto-create profile on first Google sign-in via trigger
+--
+-- CRITICAL FIX: The EXCEPTION block ensures a profile insert
+-- failure NEVER propagates back to Supabase Auth.
+-- Without it, any DB error during sign-up causes:
+--   "Database error saving new user" → auth_failed redirect.
 -- ============================================================
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger
@@ -121,6 +130,10 @@ BEGIN
   )
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Never block auth even if profile insert fails
+    RETURN NEW;
 END;
 $$;
 

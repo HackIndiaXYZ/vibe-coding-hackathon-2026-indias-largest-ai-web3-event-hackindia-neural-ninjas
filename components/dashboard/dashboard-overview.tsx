@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useState } from "react";
 import {
   MessageSquare, Phone, Mic, Zap, Crown, Building2,
-  ArrowRight, Shield, AlertTriangle, CheckCircle, Clock, History,
+  ArrowRight, Shield, AlertTriangle, CheckCircle, Clock, History, Video,
 } from "lucide-react";
 import { UpgradeModal } from "./upgrade-modal";
 import type { Plan } from "@/lib/db/types";
