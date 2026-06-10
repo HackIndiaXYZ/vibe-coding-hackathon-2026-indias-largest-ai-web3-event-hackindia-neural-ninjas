@@ -1,6 +1,6 @@
 
 <br />
-      <img src="https://github.com/The-Coder-Dev/TruScan-AI-hackathon/blob/main/public/readme/project_banner.webp">
+      <img src="https://github.com/HackIndiaXYZ/vibe-coding-hackathon-2026-indias-largest-ai-web3-event-hackindia-neural-ninjas/main/public/readme/project_banner.webp">
 <br />
 
 # TruScan AI
